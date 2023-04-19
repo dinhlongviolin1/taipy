@@ -11,6 +11,10 @@
 
 from src.taipy.gui_core.GuiCoreLib import GuiCore
 from taipy.gui import Gui
+from taipy import Scope, Config, Frequency, Core
+
+def replace(input_msg, template, name):
+    return input_msg.replace(template, name)
 
 page = """
 # Getting started with example
@@ -19,4 +23,18 @@ page = """
 
 """    
 Gui.add_library(GuiCore())
-Gui(page).run(port=8000, use_reloader=True)
+
+input_msg_cfg = Config.configure_data_node(id="input_msg", scope=Scope.GLOBAL, default_data="Hello, today it's <TPL>!")
+template_cfg = Config.configure_data_node(id="template", scope=Scope.GLOBAL, default_data="<TPL>")
+date_cfg = Config.configure_data_node(id="date")
+message_cfg = Config.configure_data_node(id="msg")
+
+replace_template_cfg = Config.configure_task("replace", replace, [input_msg_cfg, template_cfg, date_cfg], message_cfg)
+scenario_daily_cfg = Config.configure_scenario_from_tasks(id="scenario_daily_cfg",
+                                                          task_configs=[replace_template_cfg],
+                                                          frequency=Frequency.DAILY)
+scenario_cfg = Config.configure_scenario_from_tasks(id="scenario_cfg", task_configs=[replace_template_cfg])
+
+Core().run()
+
+Gui(page).run(debug=True)
