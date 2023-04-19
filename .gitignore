@@ -13,3 +13,6 @@ dist/
 .idea/
 .idea/taipy.iml
 .DS_Store
+
+# Core
+.data/

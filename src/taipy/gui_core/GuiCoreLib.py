@@ -19,7 +19,7 @@ from taipy.gui.extension import ElementLibrary, Element, ElementProperty, Proper
 
 class GuiCoreContext:
     _CORE_CHANGED_NAME = "core_changed"
-    __PROP_SCENARIO_CONFIG_ID = "config_id"
+    __PROP_SCENARIO_CONFIG_ID = "config"
     __PROP_SCENARIO_DATE = "date"
     __PROP_SCENARIO_LABEL = "label"
     __SCENARIO_PROPS = (__PROP_SCENARIO_CONFIG_ID, __PROP_SCENARIO_DATE, __PROP_SCENARIO_LABEL)
@@ -35,17 +35,17 @@ class GuiCoreContext:
 
     def __add_scenarios(self, res, scenarios):
         for scenario in scenarios:
-            res.append((scenario.id, scenario.label, 1, scenario.primary, None))
+            res.append((scenario.id, scenario.name, 1, scenario.is_primary, None))
         return res
 
     def get_scenarios(self):
         if self.scenarios is None:
             self.scenarios = []
-            for cycle, scenarios in tp.get_cycles_scenarios():
+            for cycle, scenarios in tp.get_cycles_scenarios().items():
                 if cycle is None:
                     self.__add_scenarios(self.scenarios, scenarios)
                 else:
-                    self.scenarios.append((cycle.id, cycle.label, 0, False, self.__add_scenarios([], scenarios)))
+                    self.scenarios.append((cycle.id, cycle.name, 0, False, self.__add_scenarios([], scenarios)))
         return self.scenarios
 
     def get_scenario_configs(self):
@@ -56,22 +56,31 @@ class GuiCoreContext:
         return self.scenario_configs
 
     def create_new_scenario(self, state: State, id: str, action: str, payload: t.Dict[str, str]):
-        config_id = payload.get(GuiCoreContext.__PROP_SCENARIO_CONFIG_ID)
+        print(f"create_new_scenario(state, {id}, {action}, {payload}")
+        args = payload.get("args")
+        if args is None or not isinstance(args, list) or len(args) == 0 or not isinstance(args[0], dict):
+            return
+        data = args[0]
+        config_id = data.get(GuiCoreContext.__PROP_SCENARIO_CONFIG_ID)
         scenario_config = tp.Config.scenarios.get(config_id)
         if scenario_config is None:
             state.assign(GuiCoreContext._ERROR_VAR, f"Invalid configuration id ({config_id})")
             return
-        date_str = payload.get(GuiCoreContext.__PROP_SCENARIO_DATE)
+        date_str = data.get(GuiCoreContext.__PROP_SCENARIO_DATE)
         try:
             date = parser.parse(date_str) if isinstance(date_str, str) else None
         except Exception as e:
             state.assign(GuiCoreContext._ERROR_VAR, "Invalid date ({date_str})")
             return
-        scenario = tp.create_scenario(scenario_config, date, payload.get(GuiCoreContext.__PROP_SCENARIO_LABEL))
-        for k, v in payload.items():
+        scenario = tp.create_scenario(scenario_config, date, data.get(GuiCoreContext.__PROP_SCENARIO_LABEL))
+        for k, v in data.items():
             if k not in GuiCoreContext.__SCENARIO_PROPS:
                 scenario._properties[k] = v
         state.assign(GuiCoreContext._ERROR_VAR, "")
+
+        # that should be done following the event fired by Core
+        self.scenarios = None
+        self.gui.broadcast(GuiCoreContext._CORE_CHANGED_NAME, {"scenario": True})
 
     def broadcast_core_changed(self):
         self.gui.broadcast(GuiCoreContext._CORE_CHANGED_NAME, "")
