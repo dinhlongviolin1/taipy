@@ -16,10 +16,16 @@ from taipy import Scope, Config, Frequency, Core
 def replace(input_msg, template, name):
     return input_msg.replace(template, name)
 
-page = """
-# Getting started with example
+showAdd = True
+showCycles = True
 
-<|taipy_gui_core.scenario_selector|show_add_button|display_cycles|>
+page = """
+# Scenarios Selector
+
+<|scenario_selector|show_add_button={showAdd}|display_cycles={showCycles}|>
+
+<|{"Hide Add" if showAdd else "Show Add"}|button|on_action={lambda s: s.assign("showAdd", not showAdd)}|>
+<|{"Hide Cycles" if showCycles else "Show Cycles"}|button|on_action={lambda s: s.assign("showCycles", not showCycles)}|>
 
 """    
 Gui.add_library(GuiCore())

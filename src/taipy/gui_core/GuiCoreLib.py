@@ -18,11 +18,11 @@ from taipy.gui.extension import ElementLibrary, Element, ElementProperty, Proper
 
 
 class GuiCoreContext:
-    _CORE_CHANGED_NAME = "core_changed"
     __PROP_SCENARIO_CONFIG_ID = "config"
     __PROP_SCENARIO_DATE = "date"
     __PROP_SCENARIO_LABEL = "label"
     __SCENARIO_PROPS = (__PROP_SCENARIO_CONFIG_ID, __PROP_SCENARIO_DATE, __PROP_SCENARIO_LABEL)
+    _CORE_CHANGED_NAME = "core_changed"
     _ERROR_VAR = "gui_core_error"
 
     def __init__(self, gui: Gui, core: tp.Core) -> None:
@@ -52,7 +52,7 @@ class GuiCoreContext:
         if self.scenario_configs is None:
             configs = tp.Config.scenarios
             if isinstance(configs, dict):
-                self.scenario_configs = [(id, f"{id} {c.name}") for id, c in configs.items()]
+                self.scenario_configs = [(id, f"{c.id}") for id, c in configs.items()]
         return self.scenario_configs
 
     def create_new_scenario(self, state: State, id: str, action: str, payload: t.Dict[str, str]):
