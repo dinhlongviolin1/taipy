@@ -29,7 +29,18 @@ import Dialog from "@mui/material/Dialog";
 import Select from "@mui/material/Select";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
-import { ChevronRight, ExpandMore, FlagOutlined, Close, DeleteOutline, Add, EditOutlined } from "@mui/icons-material";
+import {
+  ChevronRight,
+  ExpandMore,
+  FlagOutlined,
+  Close,
+  DeleteOutline,
+  Add,
+  EditOutlined,
+  Send,
+  CheckCircle,
+  Cancel,
+} from "@mui/icons-material";
 import TreeItem from "@mui/lab/TreeItem";
 import TreeView from "@mui/lab/TreeView";
 import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
@@ -46,6 +57,7 @@ import {
   useDispatchRequestUpdateOnFirstRender,
   createSendUpdateAction,
 } from "taipy-gui";
+import { Autocomplete, Chip, Divider, InputAdornment } from "@mui/material";
 
 enum NodeType {
   CYCLE = 0,
@@ -63,7 +75,17 @@ type Scenarios = Array<Scenario>;
 type Cycles = Array<[string, string, Scenarios, number, boolean]>;
 
 // id, is_primary, config_id, creation_date, label, tags, properties(key, value), pipelines(id, label), authorized_tags
-type ScenarioFull = [string, boolean, string, string, string, string[], Array<[string, string]>, Array<[string, string]>, string[]];
+type ScenarioFull = [
+  string,
+  boolean,
+  string,
+  string,
+  string,
+  string[],
+  Array<[string, string]>,
+  Array<[string, string]>,
+  string[]
+];
 interface ScenarioDict {
   config: string;
   name: string;
@@ -143,7 +165,7 @@ const FlagSx = {
 const ActionContentSx = { mr: 2, ml: 2 };
 
 const MainBoxSx = {
-  maxWidth: 300,
+  maxWidth: 600,
   overflowY: "auto",
 };
 
@@ -177,21 +199,54 @@ const IconButtonSx = {
   p: 0,
 };
 
-const ScenarioNodesContent = ({ scenarioId, label, openEditDialog }: ScenarioNodesContentProps) => {
+const ScenarioNodesContent = ({
+  scenarioId,
+  label,
+  openEditDialog,
+}: ScenarioNodesContentProps) => {
   return (
-    <Grid container alignItems="center" direction="row" flexWrap="nowrap" justifyContent="space-between" spacing={1}>
+    <Grid
+      container
+      alignItems="center"
+      direction="row"
+      flexWrap="nowrap"
+      justifyContent="space-between"
+      spacing={1}
+    >
       <Grid item>{label}</Grid>
       <Grid item>
-        <IconButton data-id={scenarioId} onClick={openEditDialog}>
+        <IconButton
+          data-id={scenarioId}
+          onClick={openEditDialog}
+          sx={{ padding: 0 }}
+        >
           <EditOutlined fontSize="small" color="primary" />
+        </IconButton>
+        <IconButton data-id={scenarioId} sx={{ padding: 0 }}>
+          <Send fontSize="small" color="info" />
         </IconButton>
       </Grid>
     </Grid>
   );
 };
 
-const ScenarioNodes = ({ scenarios = [], showPrimary = true, openEditDialog }: ScenarioNodesProps) => {
-  const sc = Array.isArray(scenarios) && scenarios.length && Array.isArray(scenarios[0]) ? (scenarios as Scenarios) : scenarios ? [scenarios as Scenario] : [];
+const ScenarioNodes = ({
+  scenarios = [],
+  showPrimary = true,
+  openEditDialog,
+}: ScenarioNodesProps) => {
+  const action: string = "ACTIVE";
+  let options = [
+    {
+      title: "tags1",
+    },
+  ];
+  const sc =
+    Array.isArray(scenarios) && scenarios.length && Array.isArray(scenarios[0])
+      ? (scenarios as Scenarios)
+      : scenarios
+      ? [scenarios as Scenario]
+      : [];
   return (
     <>
       {sc.map(([id, label, _, _nodeType, primary]) => (
@@ -200,20 +255,309 @@ const ScenarioNodes = ({ scenarios = [], showPrimary = true, openEditDialog }: S
           nodeId={id}
           label={
             showPrimary && primary ? (
-              <Badge badgeContent={<FlagOutlined sx={FlagSx} />} color="primary" anchorOrigin={BadgePos} sx={BadgeSx}>
-                <ScenarioNodesContent scenarioId={id} label={label} openEditDialog={openEditDialog} />
+              <Badge
+                badgeContent={<FlagOutlined sx={FlagSx} />}
+                color="primary"
+                anchorOrigin={BadgePos}
+                sx={BadgeSx}
+              >
+                <ScenarioNodesContent
+                  scenarioId={id}
+                  label={label}
+                  openEditDialog={openEditDialog}
+                />
               </Badge>
             ) : (
-              <ScenarioNodesContent scenarioId={id} label={label} openEditDialog={openEditDialog} />
+              <ScenarioNodesContent
+                scenarioId={id}
+                label={label}
+                openEditDialog={openEditDialog}
+              />
             )
           }
-        />
+        >
+          <Grid container rowSpacing={2} sx={{ mt: 2 }}>
+            <Grid item xs={12} container justifyContent="space-between">
+              <Grid item xs={4}>
+                <Typography variant="subtitle2">Config ID</Typography>
+              </Grid>
+              <Grid item xs={8}>
+                <Typography variant="subtitle2">LoremIpsum</Typography>
+              </Grid>
+            </Grid>
+            <Grid item xs={12} container justifyContent="space-between">
+              <Grid item xs={4}>
+                <Typography variant="subtitle2">Cycle / Frequency</Typography>
+              </Grid>
+              <Grid item xs={8}>
+                <Typography variant="subtitle2">
+                  Thursday 2023-02-05 / Daily
+                </Typography>
+              </Grid>
+            </Grid>
+            {action === "EDIT" && (
+              <Grid item xs={11} container justifyContent="space-between">
+                <TextField
+                  label="Label"
+                  variant="outlined"
+                  fullWidth
+                  sx={{
+                    maxWidth: "none",
+                  }}
+                  InputProps={{
+                    endAdornment: (
+                      <>
+                        <IconButton sx={{ padding: 0 }}>
+                          <CheckCircle color="primary" />
+                        </IconButton>
+                        <IconButton sx={{ padding: 0 }}>
+                          <Cancel color="inherit" />
+                        </IconButton>
+                      </>
+                    ),
+                  }}
+                />
+              </Grid>
+            )}
+            {action !== "EDIT" && (
+              <Grid item xs={12} container justifyContent="space-between">
+                <Grid item xs={4}>
+                  <Typography variant="subtitle2">Label</Typography>
+                </Grid>
+                <Grid item xs={8}>
+                  <Typography variant="subtitle2">Scenario 3</Typography>
+                </Grid>
+              </Grid>
+            )}
+            {action !== "EDIT" && (
+              <Grid item xs={12} container justifyContent="space-between">
+                <Grid item xs={4}>
+                  <Typography variant="subtitle2">Tags</Typography>
+                </Grid>
+                <Grid item xs={8}>
+                  <Chip label="Tag1" variant="outlined" />
+                  <Chip label="Tag2" variant="outlined" />
+                  <Chip label="Tag3" variant="outlined" />
+                </Grid>
+              </Grid>
+            )}
+            {action === "EDIT" && (
+              <Grid item xs={11} container justifyContent="space-between">
+                <Autocomplete
+                  multiple
+                  id="tags-filled"
+                  options={options.map((option) => option.title)}
+                  defaultValue={[options[0].title]}
+                  freeSolo
+                  renderTags={(value: readonly string[], getTagProps) =>
+                    value.map((option: string, index: number) => (
+                      <Chip
+                        variant="outlined"
+                        label={option}
+                        {...getTagProps({ index })}
+                      />
+                    ))
+                  }
+                  fullWidth
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      variant="outlined"
+                      label="Tags"
+                      sx={{
+                        maxWidth: "none",
+                      }}
+                      fullWidth
+                      InputProps={{
+                        ...params.InputProps,
+                        endAdornment: (
+                          <>
+                            <IconButton sx={{ padding: 0 }}>
+                              <CheckCircle color="primary" />
+                            </IconButton>
+                            <IconButton sx={{ padding: 0 }}>
+                              <Cancel color="inherit" />
+                            </IconButton>
+                          </>
+                        ),
+                      }}
+                    />
+                  )}
+                />
+              </Grid>
+            )}
+            <Grid item xs={12}>
+              <Divider />
+            </Grid>
+            <Grid item xs={12} container justifyContent="space-between">
+              <Typography variant="h6">Custom Properties</Typography>
+            </Grid>
+            <Grid item xs={12} container justifyContent="space-between">
+              <Grid item xs={4}>
+                {action !== "EDIT" && (
+                  <Typography variant="subtitle2">Lorem</Typography>
+                )}
+                {action === "EDIT" && (
+                  <TextField label="Key" variant="outlined" />
+                )}
+              </Grid>
+              <Grid item xs={5}>
+                {action !== "EDIT" && (
+                  <Typography variant="subtitle2">Ipsum</Typography>
+                )}
+                {action === "EDIT" && (
+                  <TextField label="Value" variant="outlined" />
+                )}
+              </Grid>
+              <Grid item xs={2}>
+                {action !== "VIEW" && (
+                  <Button
+                    variant="outlined"
+                    component="label"
+                    sx={{ height: 50, width: 50, p: 0 }}
+                    color="inherit"
+                  >
+                    <DeleteOutline fontSize="small" color="inherit" />
+                  </Button>
+                )}
+              </Grid>
+            </Grid>
+            {action !== "VIEW" && (
+              <Grid item xs={12} container justifyContent="space-between">
+                <Grid item xs={4}>
+                  <TextField data-name="key" label="Key" variant="outlined" />
+                </Grid>
+                <Grid item xs={5}>
+                  <TextField
+                    data-name="value"
+                    label="Value"
+                    variant="outlined"
+                  />
+                </Grid>
+                <Grid item xs={2}>
+                  <Button variant="outlined" component="label">
+                    <Add />
+                  </Button>
+                </Grid>
+              </Grid>
+            )}
+            <Grid item xs={12}>
+              <Divider />
+            </Grid>
+            <Grid item xs={12} container justifyContent="space-between">
+              <Typography variant="h6">Pipelines</Typography>
+            </Grid>
+            <Grid item xs={12} container justifyContent="space-between">
+              <Grid item container xs={9}>
+                {action === "EDIT" && (
+                  <TextField
+                    data-name="pipe"
+                    label="Pipeline 1"
+                    variant="outlined"
+                    name="test"
+                    sx={{
+                      maxWidth: "none",
+                    }}
+                    fullWidth
+                    InputProps={{
+                      endAdornment: (
+                        <>
+                          <IconButton sx={{ padding: 0 }}>
+                            <CheckCircle color="primary" />
+                          </IconButton>
+                          <IconButton sx={{ padding: 0 }}>
+                            <Cancel color="inherit" />
+                          </IconButton>
+                        </>
+                      ),
+                    }}
+                  />
+                )}
+                {action !== "EDIT" && (
+                  <Typography variant="subtitle2">Training Pipeline</Typography>
+                )}
+              </Grid>
+              <Grid item xs={2}>
+                <Button
+                  variant="outlined"
+                  component="label"
+                  size="small"
+                  disabled
+                >
+                  <Send color="info" />
+                </Button>
+              </Grid>
+            </Grid>
+            <Grid item xs={12} container justifyContent="space-between">
+              <Grid item xs={9}>
+                {action === "EDIT" && (
+                  <TextField
+                    data-name="pipeline2"
+                    label="Pipeline 2"
+                    variant="outlined"
+                    fullWidth
+                    sx={{
+                      maxWidth: "none",
+                    }}
+                    InputProps={{
+                      endAdornment: (
+                        <>
+                          <IconButton sx={{ padding: 0 }}>
+                            <CheckCircle color="primary" />
+                          </IconButton>
+                          <IconButton sx={{ padding: 0 }}>
+                            <Cancel color="inherit" />
+                          </IconButton>
+                        </>
+                      ),
+                    }}
+                  />
+                )}
+                {action !== "EDIT" && (
+                  <Typography variant="subtitle2">Scoring</Typography>
+                )}
+              </Grid>
+              <Grid item xs={2}>
+                <Button
+                  variant="outlined"
+                  component="label"
+                  size="small"
+                  disabled
+                >
+                  <Send color="info" />
+                </Button>
+              </Grid>
+            </Grid>
+            <Grid item xs={12}>
+              <Divider />
+            </Grid>
+            <Grid item xs={12} container justifyContent="space-between">
+              <Button
+                variant="outlined"
+                color="primary"
+                disabled={action === "VIEW"}
+              >
+                DELETE
+              </Button>
+              <Button variant="outlined" color="primary" disabled>
+                PROMOTE TO PRIMARY
+              </Button>
+            </Grid>
+          </Grid>
+        </TreeItem>
       ))}
     </>
   );
 };
 
-const ScenarioEditDialog = ({ scenario, submit, open, actionEdit, configs, close }: ScenarioEditDialogProps) => {
+const ScenarioEditDialog = ({
+  scenario,
+  submit,
+  open,
+  actionEdit,
+  configs,
+  close,
+}: ScenarioEditDialogProps) => {
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [properties, setProperties] = useState<Property[]>([]);
   const [newProp, setNewProp] = useState<Property>({
@@ -223,7 +567,10 @@ const ScenarioEditDialog = ({ scenario, submit, open, actionEdit, configs, close
   });
 
   const propertyAdd = () => {
-    setProperties((props) => [...props, { ...newProp, id: props.length + 1 + "" }]);
+    setProperties((props) => [
+      ...props,
+      { ...newProp, id: props.length + 1 + "" },
+    ]);
     setNewProp({ id: "", key: "", value: "" });
   };
 
@@ -232,27 +579,44 @@ const ScenarioEditDialog = ({ scenario, submit, open, actionEdit, configs, close
     setProperties((props) => props.filter((item) => item.id !== id));
   }, []);
 
-  const updatePropertyField = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const { idx = "", name = "" } = e.currentTarget.parentElement?.parentElement?.dataset || {};
-    if (name) {
-      if (idx) {
-        setProperties((props) =>
-          props.map((p, i) => {
-            if (idx == i + "") {
-              p[name as keyof Property] = e.target.value;
-            }
-            return p;
-          })
-        );
-      } else {
-        setNewProp((np) => ({ ...np, [name]: e.target.value }));
+  const updatePropertyField = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const { idx = "", name = "" } =
+        e.currentTarget.parentElement?.parentElement?.dataset || {};
+      if (name) {
+        if (idx) {
+          setProperties((props) =>
+            props.map((p, i) => {
+              if (idx == i + "") {
+                p[name as keyof Property] = e.target.value;
+              }
+              return p;
+            })
+          );
+        } else {
+          setNewProp((np) => ({ ...np, [name]: e.target.value }));
+        }
       }
-    }
-  }, []);
+    },
+    []
+  );
 
   useEffect(() => {
-    form.setValues(scenario ? { config: scenario[2], name: scenario[4], date: scenario[3], properties: scenario[6] } : emptyScenario);
-    setProperties(scenario ? scenario[6].map(([k, v], i) => ({ id: i + "", key: k, value: v })) : []);
+    form.setValues(
+      scenario
+        ? {
+            config: scenario[2],
+            name: scenario[4],
+            date: scenario[3],
+            properties: scenario[6],
+          }
+        : emptyScenario
+    );
+    setProperties(
+      scenario
+        ? scenario[6].map(([k, v], i) => ({ id: i + "", key: k, value: v }))
+        : []
+    );
   }, [scenario]);
 
   const form = useFormik({
@@ -275,14 +639,24 @@ const ScenarioEditDialog = ({ scenario, submit, open, actionEdit, configs, close
 
   const onConfirmDialogOpen = useCallback(() => setConfirmDialogOpen(true), []);
 
-  const onConfirmDialogClose = useCallback(() => setConfirmDialogOpen(false), []);
+  const onConfirmDialogClose = useCallback(
+    () => setConfirmDialogOpen(false),
+    []
+  );
 
   return (
     <>
       <Dialog onClose={close} open={open}>
         <DialogTitle>
-          <Grid container direction="row" justifyContent="space-between" alignItems="center">
-            <Typography variant="h5">{`${actionEdit ? `Edit` : `Create`} scenario`}</Typography>
+          <Grid
+            container
+            direction="row"
+            justifyContent="space-between"
+            alignItems="center"
+          >
+            <Typography variant="h5">{`${
+              actionEdit ? `Edit` : `Create`
+            } scenario`}</Typography>
             <IconButton aria-label="close" onClick={close} sx={IconButtonSx}>
               <Close />
             </IconButton>
@@ -310,7 +684,10 @@ const ScenarioEditDialog = ({ scenario, submit, open, actionEdit, configs, close
                           ))
                         : null}
                     </Select>
-                    <FormHelperText error={!!form.errors.config && form.touched.config} sx={{ pl: 12 }}>
+                    <FormHelperText
+                      error={!!form.errors.config && form.touched.config}
+                      sx={{ pl: 12 }}
+                    >
                       {form.errors.config}
                     </FormHelperText>
                   </FormControl>
@@ -333,7 +710,9 @@ const ScenarioEditDialog = ({ scenario, submit, open, actionEdit, configs, close
                     <DatePicker
                       label="Date"
                       value={new Date(form.values.date)}
-                      onChange={(date) => form.setFieldValue("date", date?.toISOString())}
+                      onChange={(date) =>
+                        form.setFieldValue("date", date?.toISOString())
+                      }
                       disabled={actionEdit}
                     />
                   </LocalizationProvider>
@@ -344,15 +723,40 @@ const ScenarioEditDialog = ({ scenario, submit, open, actionEdit, configs, close
               </Grid>
               {properties
                 ? properties.map((item, index) => (
-                    <Grid item xs={12} key={item.id} container justifyContent="space-between">
+                    <Grid
+                      item
+                      xs={12}
+                      key={item.id}
+                      container
+                      justifyContent="space-between"
+                    >
                       <Grid item xs={4}>
-                        <TextField value={item.key} label="Key" variant="outlined" data-name="key" data-idx={index} onChange={updatePropertyField} />
+                        <TextField
+                          value={item.key}
+                          label="Key"
+                          variant="outlined"
+                          data-name="key"
+                          data-idx={index}
+                          onChange={updatePropertyField}
+                        />
                       </Grid>
                       <Grid item xs={5}>
-                        <TextField value={item.value} label="Value" variant="outlined" data-name="value" data-idx={index} onChange={updatePropertyField} />
+                        <TextField
+                          value={item.value}
+                          label="Value"
+                          variant="outlined"
+                          data-name="value"
+                          data-idx={index}
+                          onChange={updatePropertyField}
+                        />
                       </Grid>
                       <Grid item xs={2}>
-                        <Button variant="outlined" component="label" data-id={item.id} onClick={propertyDelete}>
+                        <Button
+                          variant="outlined"
+                          component="label"
+                          data-id={item.id}
+                          onClick={propertyDelete}
+                        >
                           <DeleteOutline />
                         </Button>
                       </Grid>
@@ -361,13 +765,30 @@ const ScenarioEditDialog = ({ scenario, submit, open, actionEdit, configs, close
                 : null}
               <Grid item xs={12} container justifyContent="space-between">
                 <Grid item xs={4}>
-                  <TextField value={newProp.key} data-name="key" onChange={updatePropertyField} label="Key" variant="outlined" />
+                  <TextField
+                    value={newProp.key}
+                    data-name="key"
+                    onChange={updatePropertyField}
+                    label="Key"
+                    variant="outlined"
+                  />
                 </Grid>
                 <Grid item xs={5}>
-                  <TextField value={newProp.value} data-name="value" onChange={updatePropertyField} label="Value" variant="outlined" />
+                  <TextField
+                    value={newProp.value}
+                    data-name="value"
+                    onChange={updatePropertyField}
+                    label="Value"
+                    variant="outlined"
+                  />
                 </Grid>
                 <Grid item xs={2}>
-                  <Button variant="outlined" component="label" onClick={propertyAdd} disabled={!newProp.key || !newProp.value}>
+                  <Button
+                    variant="outlined"
+                    component="label"
+                    onClick={propertyAdd}
+                    disabled={!newProp.key || !newProp.value}
+                  >
                     <Add />
                   </Button>
                 </Grid>
@@ -379,19 +800,32 @@ const ScenarioEditDialog = ({ scenario, submit, open, actionEdit, configs, close
             <Grid container justifyContent="space-between" sx={ActionContentSx}>
               {actionEdit && (
                 <Grid item xs={6}>
-                  <Button variant="outlined" color="primary" onClick={onConfirmDialogOpen}>
+                  <Button
+                    variant="outlined"
+                    color="primary"
+                    onClick={onConfirmDialogOpen}
+                  >
                     DELETE
                   </Button>
                 </Grid>
               )}
-              <Grid item container xs={actionEdit ? 6 : 12} justifyContent="flex-end">
+              <Grid
+                item
+                container
+                xs={actionEdit ? 6 : 12}
+                justifyContent="flex-end"
+              >
                 <Grid item sx={CancelBtnSx}>
                   <Button variant="outlined" onClick={close}>
                     CANCEL
                   </Button>
                 </Grid>
                 <Grid item>
-                  <Button variant="contained" type="submit" disabled={!form.values.config || !form.values.name}>
+                  <Button
+                    variant="contained"
+                    type="submit"
+                    disabled={!form.values.config || !form.values.name}
+                  >
                     {actionEdit ? "APPLY" : "CREATE"}
                   </Button>
                 </Grid>
@@ -403,22 +837,41 @@ const ScenarioEditDialog = ({ scenario, submit, open, actionEdit, configs, close
 
       <Dialog onClose={onConfirmDialogClose} open={confirmDialogOpen}>
         <DialogTitle>
-          <Grid container direction="row" justifyContent="space-between" alignItems="center">
+          <Grid
+            container
+            direction="row"
+            justifyContent="space-between"
+            alignItems="center"
+          >
             <Typography variant="h5">Delete Scenario</Typography>
-            <IconButton aria-label="close" onClick={onConfirmDialogClose} sx={IconButtonSx}>
+            <IconButton
+              aria-label="close"
+              onClick={onConfirmDialogClose}
+              sx={IconButtonSx}
+            >
               <Close />
             </IconButton>
           </Grid>
         </DialogTitle>
         <DialogContent dividers>
-          <Typography>Are you sure you want to delete this scenario?</Typography>
+          <Typography>
+            Are you sure you want to delete this scenario?
+          </Typography>
         </DialogContent>
 
         <DialogActions>
-          <Button variant="outlined" color="inherit" onClick={onConfirmDialogClose}>
+          <Button
+            variant="outlined"
+            color="inherit"
+            onClick={onConfirmDialogClose}
+          >
             CANCEL
           </Button>
-          <Button variant="contained" color="primary" onClick={onDeleteScenario}>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={onDeleteScenario}
+          >
             DELETE
           </Button>
         </DialogActions>
@@ -437,9 +890,21 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
 
   useDispatchRequestUpdateOnFirstRender(dispatch, "", module, props.updateVars);
 
-  const showAddButton = useDynamicProperty(props.showAddButton, props.defaultShowAddButton, true);
-  const displayCycles = useDynamicProperty(props.displayCycles, props.defaultDisplayCycles, true);
-  const showPrimaryFlag = useDynamicProperty(props.showPrimaryFlag, props.defaultShowPrimaryFlag, true);
+  const showAddButton = useDynamicProperty(
+    props.showAddButton,
+    props.defaultShowAddButton,
+    true
+  );
+  const displayCycles = useDynamicProperty(
+    props.displayCycles,
+    props.defaultDisplayCycles,
+    true
+  );
+  const showPrimaryFlag = useDynamicProperty(
+    props.showPrimaryFlag,
+    props.defaultShowPrimaryFlag,
+    true
+  );
 
   const onDialogOpen = useCallback(() => {
     setOpen(true);
@@ -454,7 +919,11 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
   const openEditDialog = useCallback(
     (e: React.MouseEvent<HTMLElement>) => {
       const { id: scenId } = e.currentTarget?.dataset || {};
-      scenId && props.onScenarioSelect && dispatch(createSendActionNameAction(id, module, props.onScenarioSelect, scenId));
+      scenId &&
+        props.onScenarioSelect &&
+        dispatch(
+          createSendActionNameAction(id, module, props.onScenarioSelect, scenId)
+        );
       setOpen(true);
       setActionEdit(true);
       return false;
@@ -463,7 +932,10 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
   );
 
   const onSubmit = useCallback(
-    (...values: any[]) => dispatch(createSendActionNameAction(id, module, props.onScenarioCrud, ...values)),
+    (...values: any[]) =>
+      dispatch(
+        createSendActionNameAction(id, module, props.onScenarioCrud, ...values)
+      ),
     [id, module, props.onScenarioCrud]
   );
 
@@ -471,18 +943,29 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
   useEffect(() => {
     if (props.coreChanged?.scenario) {
       const updateVar = getUpdateVar(props.updateVars, "scenarios");
-      updateVar && dispatch(createRequestUpdateAction(id, module, [updateVar], true));
+      updateVar &&
+        dispatch(createRequestUpdateAction(id, module, [updateVar], true));
     }
   }, [props.coreChanged, props.updateVars, module, dispatch]);
 
   const onSelect = useCallback(
     (e: React.SyntheticEvent, nodeIds: Array<string> | string) => {
-      const { cycle = false } = (e.currentTarget as HTMLElement)?.parentElement?.dataset || {};
+      const { cycle = false } =
+        (e.currentTarget as HTMLElement)?.parentElement?.dataset || {};
       if (cycle) {
         return;
       }
       const scenariosVar = getUpdateVar(props.updateVars, "scenarios");
-      dispatch(createSendUpdateAction(props.updateVarName, nodeIds, module, props.onChange, propagate, scenariosVar));
+      dispatch(
+        createSendUpdateAction(
+          props.updateVarName,
+          nodeIds,
+          module,
+          props.onChange,
+          propagate,
+          scenariosVar
+        )
+      );
     },
     [props.updateVarName, props.updateVars, props.onChange, propagate, module]
   );
@@ -490,7 +973,12 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
   return (
     <div>
       <Box sx={MainBoxSx}>
-        <TreeView defaultCollapseIcon={<ExpandMore />} defaultExpandIcon={<ChevronRight />} sx={TreeViewSx} onNodeSelect={onSelect}>
+        <TreeView
+          defaultCollapseIcon={<ExpandMore />}
+          defaultExpandIcon={<ChevronRight />}
+          sx={TreeViewSx}
+          onNodeSelect={onSelect}
+        >
           {scenarios
             ? scenarios.map((item) => {
                 const [id, label, scenarios, nodeType, _] = item;
@@ -498,16 +986,38 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
                   <>
                     {displayCycles ? (
                       nodeType === NodeType.CYCLE ? (
-                        <TreeItem key={id} nodeId={id} label={label} sx={CycleSx} data-cycle>
-                          <ScenarioNodes scenarios={scenarios} showPrimary={showPrimaryFlag} openEditDialog={openEditDialog} />
+                        <TreeItem
+                          key={id}
+                          nodeId={id}
+                          label={label}
+                          sx={CycleSx}
+                          data-cycle
+                        >
+                          <ScenarioNodes
+                            scenarios={scenarios}
+                            showPrimary={showPrimaryFlag}
+                            openEditDialog={openEditDialog}
+                          />
                         </TreeItem>
                       ) : (
-                        <ScenarioNodes scenarios={item as Scenario} showPrimary={showPrimaryFlag} openEditDialog={openEditDialog} />
+                        <ScenarioNodes
+                          scenarios={item as Scenario}
+                          showPrimary={showPrimaryFlag}
+                          openEditDialog={openEditDialog}
+                        />
                       )
                     ) : nodeType === NodeType.SCENARIO ? (
-                      <ScenarioNodes scenarios={item as Scenario} showPrimary={showPrimaryFlag} openEditDialog={openEditDialog} />
+                      <ScenarioNodes
+                        scenarios={item as Scenario}
+                        showPrimary={showPrimaryFlag}
+                        openEditDialog={openEditDialog}
+                      />
                     ) : (
-                      <ScenarioNodes scenarios={scenarios} showPrimary={showPrimaryFlag} openEditDialog={openEditDialog} />
+                      <ScenarioNodes
+                        scenarios={scenarios}
+                        showPrimary={showPrimaryFlag}
+                        openEditDialog={openEditDialog}
+                      />
                     )}
                   </>
                 );
