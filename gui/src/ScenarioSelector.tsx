@@ -37,9 +37,6 @@ import {
   DeleteOutline,
   Add,
   EditOutlined,
-  Send,
-  CheckCircle,
-  Cancel,
 } from "@mui/icons-material";
 import TreeItem from "@mui/lab/TreeItem";
 import TreeView from "@mui/lab/TreeView";
@@ -57,7 +54,6 @@ import {
   useDispatchRequestUpdateOnFirstRender,
   createSendUpdateAction,
 } from "taipy-gui";
-import { Autocomplete, Chip, Divider, InputAdornment } from "@mui/material";
 
 enum NodeType {
   CYCLE = 0,
@@ -165,7 +161,7 @@ const FlagSx = {
 const ActionContentSx = { mr: 2, ml: 2 };
 
 const MainBoxSx = {
-  maxWidth: 600,
+  maxWidth: 300,
   overflowY: "auto",
 };
 
@@ -215,15 +211,8 @@ const ScenarioNodesContent = ({
     >
       <Grid item>{label}</Grid>
       <Grid item>
-        <IconButton
-          data-id={scenarioId}
-          onClick={openEditDialog}
-          sx={{ padding: 0 }}
-        >
+        <IconButton data-id={scenarioId} onClick={openEditDialog}>
           <EditOutlined fontSize="small" color="primary" />
-        </IconButton>
-        <IconButton data-id={scenarioId} sx={{ padding: 0 }}>
-          <Send fontSize="small" color="info" />
         </IconButton>
       </Grid>
     </Grid>
@@ -235,12 +224,6 @@ const ScenarioNodes = ({
   showPrimary = true,
   openEditDialog,
 }: ScenarioNodesProps) => {
-  const action: string = "ACTIVE";
-  let options = [
-    {
-      title: "tags1",
-    },
-  ];
   const sc =
     Array.isArray(scenarios) && scenarios.length && Array.isArray(scenarios[0])
       ? (scenarios as Scenarios)
@@ -275,276 +258,7 @@ const ScenarioNodes = ({
               />
             )
           }
-        >
-          <Grid container rowSpacing={2} sx={{ mt: 2 }}>
-            <Grid item xs={12} container justifyContent="space-between">
-              <Grid item xs={4}>
-                <Typography variant="subtitle2">Config ID</Typography>
-              </Grid>
-              <Grid item xs={8}>
-                <Typography variant="subtitle2">LoremIpsum</Typography>
-              </Grid>
-            </Grid>
-            <Grid item xs={12} container justifyContent="space-between">
-              <Grid item xs={4}>
-                <Typography variant="subtitle2">Cycle / Frequency</Typography>
-              </Grid>
-              <Grid item xs={8}>
-                <Typography variant="subtitle2">
-                  Thursday 2023-02-05 / Daily
-                </Typography>
-              </Grid>
-            </Grid>
-            {action === "EDIT" && (
-              <Grid item xs={11} container justifyContent="space-between">
-                <TextField
-                  label="Label"
-                  variant="outlined"
-                  fullWidth
-                  sx={{
-                    maxWidth: "none",
-                  }}
-                  InputProps={{
-                    endAdornment: (
-                      <>
-                        <IconButton sx={{ padding: 0 }}>
-                          <CheckCircle color="primary" />
-                        </IconButton>
-                        <IconButton sx={{ padding: 0 }}>
-                          <Cancel color="inherit" />
-                        </IconButton>
-                      </>
-                    ),
-                  }}
-                />
-              </Grid>
-            )}
-            {action !== "EDIT" && (
-              <Grid item xs={12} container justifyContent="space-between">
-                <Grid item xs={4}>
-                  <Typography variant="subtitle2">Label</Typography>
-                </Grid>
-                <Grid item xs={8}>
-                  <Typography variant="subtitle2">Scenario 3</Typography>
-                </Grid>
-              </Grid>
-            )}
-            {action !== "EDIT" && (
-              <Grid item xs={12} container justifyContent="space-between">
-                <Grid item xs={4}>
-                  <Typography variant="subtitle2">Tags</Typography>
-                </Grid>
-                <Grid item xs={8}>
-                  <Chip label="Tag1" variant="outlined" />
-                  <Chip label="Tag2" variant="outlined" />
-                  <Chip label="Tag3" variant="outlined" />
-                </Grid>
-              </Grid>
-            )}
-            {action === "EDIT" && (
-              <Grid item xs={11} container justifyContent="space-between">
-                <Autocomplete
-                  multiple
-                  id="tags-filled"
-                  options={options.map((option) => option.title)}
-                  defaultValue={[options[0].title]}
-                  freeSolo
-                  renderTags={(value: readonly string[], getTagProps) =>
-                    value.map((option: string, index: number) => (
-                      <Chip
-                        variant="outlined"
-                        label={option}
-                        {...getTagProps({ index })}
-                      />
-                    ))
-                  }
-                  fullWidth
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      variant="outlined"
-                      label="Tags"
-                      sx={{
-                        maxWidth: "none",
-                      }}
-                      fullWidth
-                      InputProps={{
-                        ...params.InputProps,
-                        endAdornment: (
-                          <>
-                            <IconButton sx={{ padding: 0 }}>
-                              <CheckCircle color="primary" />
-                            </IconButton>
-                            <IconButton sx={{ padding: 0 }}>
-                              <Cancel color="inherit" />
-                            </IconButton>
-                          </>
-                        ),
-                      }}
-                    />
-                  )}
-                />
-              </Grid>
-            )}
-            <Grid item xs={12}>
-              <Divider />
-            </Grid>
-            <Grid item xs={12} container justifyContent="space-between">
-              <Typography variant="h6">Custom Properties</Typography>
-            </Grid>
-            <Grid item xs={12} container justifyContent="space-between">
-              <Grid item xs={4}>
-                {action !== "EDIT" && (
-                  <Typography variant="subtitle2">Lorem</Typography>
-                )}
-                {action === "EDIT" && (
-                  <TextField label="Key" variant="outlined" />
-                )}
-              </Grid>
-              <Grid item xs={5}>
-                {action !== "EDIT" && (
-                  <Typography variant="subtitle2">Ipsum</Typography>
-                )}
-                {action === "EDIT" && (
-                  <TextField label="Value" variant="outlined" />
-                )}
-              </Grid>
-              <Grid item xs={2}>
-                {action !== "VIEW" && (
-                  <Button
-                    variant="outlined"
-                    component="label"
-                    sx={{ height: 50, width: 50, p: 0 }}
-                    color="inherit"
-                  >
-                    <DeleteOutline fontSize="small" color="inherit" />
-                  </Button>
-                )}
-              </Grid>
-            </Grid>
-            {action !== "VIEW" && (
-              <Grid item xs={12} container justifyContent="space-between">
-                <Grid item xs={4}>
-                  <TextField data-name="key" label="Key" variant="outlined" />
-                </Grid>
-                <Grid item xs={5}>
-                  <TextField
-                    data-name="value"
-                    label="Value"
-                    variant="outlined"
-                  />
-                </Grid>
-                <Grid item xs={2}>
-                  <Button variant="outlined" component="label">
-                    <Add />
-                  </Button>
-                </Grid>
-              </Grid>
-            )}
-            <Grid item xs={12}>
-              <Divider />
-            </Grid>
-            <Grid item xs={12} container justifyContent="space-between">
-              <Typography variant="h6">Pipelines</Typography>
-            </Grid>
-            <Grid item xs={12} container justifyContent="space-between">
-              <Grid item container xs={9}>
-                {action === "EDIT" && (
-                  <TextField
-                    data-name="pipe"
-                    label="Pipeline 1"
-                    variant="outlined"
-                    name="test"
-                    sx={{
-                      maxWidth: "none",
-                    }}
-                    fullWidth
-                    InputProps={{
-                      endAdornment: (
-                        <>
-                          <IconButton sx={{ padding: 0 }}>
-                            <CheckCircle color="primary" />
-                          </IconButton>
-                          <IconButton sx={{ padding: 0 }}>
-                            <Cancel color="inherit" />
-                          </IconButton>
-                        </>
-                      ),
-                    }}
-                  />
-                )}
-                {action !== "EDIT" && (
-                  <Typography variant="subtitle2">Training Pipeline</Typography>
-                )}
-              </Grid>
-              <Grid item xs={2}>
-                <Button
-                  variant="outlined"
-                  component="label"
-                  size="small"
-                  disabled
-                >
-                  <Send color="info" />
-                </Button>
-              </Grid>
-            </Grid>
-            <Grid item xs={12} container justifyContent="space-between">
-              <Grid item xs={9}>
-                {action === "EDIT" && (
-                  <TextField
-                    data-name="pipeline2"
-                    label="Pipeline 2"
-                    variant="outlined"
-                    fullWidth
-                    sx={{
-                      maxWidth: "none",
-                    }}
-                    InputProps={{
-                      endAdornment: (
-                        <>
-                          <IconButton sx={{ padding: 0 }}>
-                            <CheckCircle color="primary" />
-                          </IconButton>
-                          <IconButton sx={{ padding: 0 }}>
-                            <Cancel color="inherit" />
-                          </IconButton>
-                        </>
-                      ),
-                    }}
-                  />
-                )}
-                {action !== "EDIT" && (
-                  <Typography variant="subtitle2">Scoring</Typography>
-                )}
-              </Grid>
-              <Grid item xs={2}>
-                <Button
-                  variant="outlined"
-                  component="label"
-                  size="small"
-                  disabled
-                >
-                  <Send color="info" />
-                </Button>
-              </Grid>
-            </Grid>
-            <Grid item xs={12}>
-              <Divider />
-            </Grid>
-            <Grid item xs={12} container justifyContent="space-between">
-              <Button
-                variant="outlined"
-                color="primary"
-                disabled={action === "VIEW"}
-              >
-                DELETE
-              </Button>
-              <Button variant="outlined" color="primary" disabled>
-                PROMOTE TO PRIMARY
-              </Button>
-            </Grid>
-          </Grid>
-        </TreeItem>
+        />
       ))}
     </>
   );
