@@ -1,4 +1,4 @@
 import ScenarioSelector from "./ScenarioSelector";
-import ScenarioVisualizer from "./ScenarioVisualizer";
+import ScenarioViewer from "./ScenarioViewer";
 
-export { ScenarioSelector, ScenarioVisualizer };
+export { ScenarioSelector, ScenarioViewer };
