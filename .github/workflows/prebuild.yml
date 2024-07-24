@@ -15,13 +15,11 @@ jobs:
   reset-prebuild:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Reset prebuild branch to develop
+        uses: nicksnell/action-reset-repo@master
         with:
-          ref: prebuild
-      - name: Reset prebuild branch
-        run: |
-          git reset --hard develop
-          git push --force
+          base_branch: develop
+          reset_branch: prebuild
 
   prebuild:
     needs: reset-prebuild
