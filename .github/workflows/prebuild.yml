@@ -1,4 +1,4 @@
-name: Generate prebuild for develop branch
+lop branch
 
 on:
   push:
@@ -25,9 +25,8 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Hash taipy-gui source code
-        id: hash-gui-fe
-        working-directory: ./
+      - name: Hash frontend source code
+        id: hash-frontend
         run: |
           python tools/frontend/hash_source.py
           echo "HASH=$(cat hash.txt)" >> $GITHUB_OUTPUT
@@ -61,6 +60,11 @@ jobs:
           git checkout -- frontend/taipy/package.json
           git checkout -- frontend/taipy/package-lock.json
           git checkout -- frontend/taipy-gui/package-lock.json
+
+      - name: remove gitignored files
+        run: |
+          rm taipy/gui/.gitignore
+          rm taipy/gui_core/.gitignore
 
       - name: Commit prebuild changes
         uses: stefanzweifel/git-auto-commit-action@v5
