@@ -53,7 +53,7 @@ jobs:
 
       - name: Frontend Bundle Build
         if: steps.cache-fe-build.outputs.cache-hit != 'true'
-        run: pipenv run python tools/frontend/bundle_build.py
+        run: python tools/frontend/bundle_build.py
 
       - name: Reset npm dependencies
         if: steps.cache-fe-build.outputs.cache-hit != 'true'
