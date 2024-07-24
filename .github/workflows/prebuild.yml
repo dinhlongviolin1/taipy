@@ -1,4 +1,4 @@
-lop branch
+name: Generate prebuild for develop branch
 
 on:
   push:
