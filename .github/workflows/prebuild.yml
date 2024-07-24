@@ -12,10 +12,21 @@ env:
   NODE_OPTIONS: --max-old-space-size=4096
 
 jobs:
+  reset-prebuild:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: prebuild
+      - name: Reset prebuild branch
+        run: |
+          git reset --hard origin/develop
+          git push --force
+
   prebuild:
+    needs: reset-prebuild
     timeout-minutes: 20
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
         with:
@@ -61,12 +72,7 @@ jobs:
           git checkout -- frontend/taipy/package-lock.json
           git checkout -- frontend/taipy-gui/package-lock.json
 
-      - name: remove gitignored files
-        run: |
-          rm taipy/gui/.gitignore
-          rm taipy/gui_core/.gitignore
-
-      - name: add frontend build
+      - name: Add frontend build force to bypass gitignore
         run: |
           git add -f taipy/gui/webapp
           git add -f taipy/gui_core/lib
