@@ -20,7 +20,7 @@ jobs:
           ref: prebuild
       - name: Reset prebuild branch
         run: |
-          git reset --hard origin/develop
+          git reset --hard develop
           git push --force
 
   prebuild:
