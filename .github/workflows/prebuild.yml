@@ -66,6 +66,11 @@ jobs:
           rm taipy/gui/.gitignore
           rm taipy/gui_core/.gitignore
 
+      - name: add frontend build
+        run: |
+          git add -f taipy/gui/webapp
+          git add -f taipy/gui_core/lib
+
       - name: Commit prebuild changes
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
